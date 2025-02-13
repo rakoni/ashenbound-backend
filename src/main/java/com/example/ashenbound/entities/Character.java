@@ -1,22 +1,34 @@
 package com.example.ashenbound.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import org.hibernate.annotations.CollectionId;
 
+@AllArgsConstructor
 @Entity
+@Table(name = "characters")
 public class Character {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(unique = true, nullable = false)
   private String name;
+
+  @Column(nullable = false)
   private int health;
+
+  @Column(nullable = false)
   private int maxHealth;
+
+  @Column(nullable = false)
   private int strength;
+
+  @Column(nullable = false)
   private int defense;
+
+  @Column(nullable = false)
   private int age;
 
   public Character(){
