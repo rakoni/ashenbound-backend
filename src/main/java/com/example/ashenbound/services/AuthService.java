@@ -1,13 +1,12 @@
 package com.example.ashenbound.services;
 
-import com.example.ashenbound.dto.AuthResponse;
+
 import com.example.ashenbound.dto.LoginRequest;
 import com.example.ashenbound.dto.RegisterRequest;
 import com.example.ashenbound.entities.User;
-import com.example.ashenbound.exceptions.UserAlreadyExistsException;
 import com.example.ashenbound.repository.UserRepository;
-import com.example.ashenbound.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,35 +16,34 @@ public class AuthService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
-  private final JwtUtils jwtUtils;
 
-  public AuthResponse register(RegisterRequest request) {
-    if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-      throw new UserAlreadyExistsException("User already exists!");
+  public User register(RegisterRequest request) throws Exception {
+
+    // Check if the user already exists
+    if (userRepository.existsByUsername(request.getUsername())) {
+      throw new RuntimeException("Username is already taken.");
     }
 
-    User user = new User();
-    user.setEmail(request.getEmail());
-    // Encrypt the password before saving.
-    user.setPassword(passwordEncoder.encode(request.getPassword()));
+    // Create the user object
+    User newUser = new User();
+    newUser.setUsername(request.getUsername());
+    newUser.setPassword(new BCryptPasswordEncoder().encode(request.getPassword())); // Encrypt password
+    newUser.setEmail(request.getEmail());
 
-    userRepository.save(user);
-
-    // Generate a JWT token for the new user.
-    String token = jwtUtils.generateToken(user);
-    return new AuthResponse(token);
+    // Save the user to the database
+    return userRepository.save(newUser);
   }
 
-  public AuthResponse login(LoginRequest request) {
-    User user = userRepository.findByEmail(request.getEmail())
-            .orElseThrow(() -> new RuntimeException("User not found!"));
+  public String login(LoginRequest request) {
 
-    // Check if the provided password matches the stored encrypted password.
-    if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-      throw new RuntimeException("Invalid credentials!");
+    // Retrieve the actual User entity from the repository using the username
+    User user = userRepository.findByUsername(request.getUsername())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    if(passwordEncoder.matches(request.getPassword(), user.getPassword())){
+      return "Login successful";
     }
-
-    String token = jwtUtils.generateToken(user);
-    return new AuthResponse(token);
+    throw new RuntimeException("Invalid credentials");
   }
+
 }

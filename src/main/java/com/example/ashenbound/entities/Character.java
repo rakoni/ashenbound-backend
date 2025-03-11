@@ -2,11 +2,17 @@ package com.example.ashenbound.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CollectionId;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "characters")
+@Getter
+@Setter
 public class Character {
 
   @Id
@@ -31,63 +37,8 @@ public class Character {
   @Column(nullable = false)
   private int age;
 
-  public Character(){
+  @OneToOne
+  @JoinColumn(name = "user_id", unique = true) //Links character to user
+  private User user;
 
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public Long getId(){
-    return id;
-  }
-
-  public void setName(String name){
-    this.name = name;
-  }
-
-  public String getName(){
-    return name;
-  }
-
-  public void setHealth(int health){
-    this.health = health;
-  }
-
-  public int getHealth(){
-    return health;
-  }
-
-  public void setMaxHealth(int maxHealth) {
-    this.maxHealth = maxHealth;
-  }
-
-  public int getMaxHealth() {
-    return maxHealth;
-  }
-
-  public void setStrength(int strength) {
-    this.strength = strength;
-  }
-
-  public int getStrength(){
-    return strength;
-  }
-
-  public void setDefense(int defense) {
-    this.defense = defense;
-  }
-
-  public int getDefense(){
-    return defense;
-  }
-
-  public void setAge(int age) {
-    this.age = age;
-  }
-
-  public int getAge(){
-    return age;
-  }
 }
